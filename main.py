@@ -2,10 +2,10 @@ import cv2
 import numpy as np
 from time import sleep
 
-width_min = 50 
+width_min = 50
 height_min = 50
 
-offset = 3  
+offset = 3
 pos_line = 220
 delay = 60
 detect = []
@@ -34,7 +34,8 @@ while True:
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     expanded = cv2.morphologyEx(expand, cv2.MORPH_CLOSE, kernel)
     expanded = cv2.morphologyEx(expanded, cv2.MORPH_CLOSE, kernel)
-    outline, h = cv2.findContours(expanded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    outline, h = cv2.findContours(
+        expanded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     cv2.line(frame1, (25, pos_line), (1200, pos_line), (255, 127, 0), 3)
     for (i, c) in enumerate(outline):
@@ -51,13 +52,14 @@ while True:
         for (x, y) in detect:
             if (pos_line + offset) > y > (pos_line - offset):
                 cars += 1
-                cv2.line(frame1, (25, pos_line), (1200, pos_line), (0, 127, 255), 3)
+                cv2.line(frame1, (25, pos_line),
+                         (1200, pos_line), (0, 127, 255), 3)
                 detect.remove((x, y))
                 print("car is detected : " + str(cars))
                 print(x, y, w, h)
 
-
-    cv2.putText(frame1, "VEHICLE COUNT : " + str(cars), (450, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 5)
+    cv2.putText(frame1, "VEHICLE COUNT : " + str(cars), (450, 70),
+                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 5)
     cv2.imshow("Original Video", frame1)
     cv2.imshow("Detector", expanded)
 
