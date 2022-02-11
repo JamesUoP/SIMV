@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from time import sleep
+from PIL import Image
 
 width_min = 40  # Minimum rectangle length
 height_min = 40  # Minimum rectangle length
@@ -61,11 +62,16 @@ while True:
                 detect.remove((x, y))
                 print("car is detected : " + str(cars))
                 print(x, y, w, h)
+                im = Image.fromarray(frame1,"RGB")
+                im1 = im.crop((x-w/2, y-h/2, x+w/2, y+h/2))
+              #  im.show()
+                im1.show()
+
                 if x >= 250:
                     print("In")
                 else:
                     print("Out")
-
+                
     cv2.putText(frame1, "VEHICLE COUNT : " + str(cars), (450, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 5)
     cv2.imshow("Original Video", frame1)
     cv2.imshow("Detector", expanded)
