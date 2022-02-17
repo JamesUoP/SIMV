@@ -1,70 +1,57 @@
 import cv2
 import numpy as np
 from time import sleep
+from PIL import Image
+fps = 60
 
-width_min = 50
-height_min = 50
+kernel = None
 
-offset = 3
-pos_line = 220
-delay = 60
-detect = []
-cars = 0
-
-
-def work_centre(x, y, w, h):
-    x1 = int(w / 2)
-    y1 = int(h / 2)
-    cx = x + x1
-    cy = y + y1
-    return cx, cy
-
-
-cap = cv2.VideoCapture('superbusyvid.mp4')
-subtractor = cv2.bgsegm.createBackgroundSubtractorMOG()
+cap = cv2.VideoCapture('4ktestvid_Trim10sec.mp4')
+backgroundObject = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
 
 while True:
-    ret, frame1 = cap.read()
-    tempo = float(1 / delay)
+    ret, frame = cap.read()
+    tempo = float(1 / fps)
     sleep(tempo)
-    grey = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(grey, (3, 3), 5)
-    img_sub = subtractor.apply(blur)
-    expand = cv2.dilate(img_sub, np.ones((5, 5)))
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    expanded = cv2.morphologyEx(expand, cv2.MORPH_CLOSE, kernel)
-    expanded = cv2.morphologyEx(expanded, cv2.MORPH_CLOSE, kernel)
-    outline, h = cv2.findContours(
-        expanded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    cv2.line(frame1, (25, pos_line), (1200, pos_line), (255, 127, 0), 3)
-    for (i, c) in enumerate(outline):
-        (x, y, w, h) = cv2.boundingRect(c)
-        validate_outline = (w >= width_min) and (h >= height_min)
-        if not validate_outline:
-            continue
-
-        cv2.rectangle(frame1, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        center = work_centre(x, y, w, h)
-        detect.append(center)
-        cv2.circle(frame1, center, 4, (0, 0, 255), -1)
-
-        for (x, y) in detect:
-            if (pos_line + offset) > y > (pos_line - offset):
-                cars += 1
-                cv2.line(frame1, (25, pos_line),
-                         (1200, pos_line), (0, 127, 255), 3)
-                detect.remove((x, y))
-                print("car is detected : " + str(cars))
-                print(x, y, w, h)
-
-    cv2.putText(frame1, "VEHICLE COUNT : " + str(cars), (450, 70),
-                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 5)
-    cv2.imshow("Original Video", frame1)
-    cv2.imshow("Detector", expanded)
-
-    if cv2.waitKey(1) == 27:
+    if not ret:
         break
 
-cv2.destroyAllWindows()
+    #Apply the background object on the frame to get the segement mask
+    fgmask = backgroundObject.apply(frame)
+
+    _, fgmask = cv2.threshold(fgmask, 250, 255, cv2.THRESH_BINARY)
+
+    fgmask = cv2.erode(fgmask, kernel, iterations = 1)
+    fgmask = cv2.dilate(fgmask, kernel, iterations = 2)
+
+
+    contours, _ = cv2.findContours(fgmask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    frameCopy = frame.copy()
+
+    for cnt in contours:
+
+        if cv2.contourArea(cnt) > 400:
+            x, y, width, height = cv2.boundingRect(cnt)
+
+            cv2.rectangle(frameCopy, (x , y), (x + width , y+ height), (0, 0, 255), 2)
+
+            cv2.putText(frameCopy, 'Car Detected', (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 0), 1, cv2.LINE_AA)
+
+    foregroundPart = cv2.bitwise_and(frame, frame, mask=fgmask)
+
+    stacked = np.hstack((frame, foregroundPart, frameCopy))
+
+    #cv2.imshow('Original Frame, Extracted Foreground and Detected Cars', cv2.resize(stacked, None, fx=0.5, fy=0.5))
+    cv2.imshow('Original Frame, Extracted Foreground and Detected Cars', stacked)
+
+    cv2.imshow('Clean Mask', fgmask)
+
+    k = cv2.waitKey(1) & 0xff
+
+    if k == ord('q'):
+        break
+
 cap.release()
+
+cv2.destroyAllWindows()
