@@ -36,7 +36,6 @@ delay = fps = cap.get(cv2.CAP_PROP_FPS)
 
 n = 0
 while True:
-    n = n+1
     ret, frame1 = cap.read()
     tempo = float(1 / delay)
     sleep(tempo)
