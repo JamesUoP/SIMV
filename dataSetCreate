@@ -2,90 +2,85 @@ import os
 import shutil
 import cv2
 
-
-rootPath  ="E:\MEngdata\obj" #folder to be sorted
-testLocation = "E:\MEngdata\Test"
-trainLocation = "E:\MEngdata\Train"
-testDataLoc = "E:\MEngdata\Test\data.txt"
-trainDataLoc = "E:\MEngdata\Train\data.txt"
+rootPath  ="D:\TrainingMEngData\obj"
+testLocation = "D:\TrainingMEngData\Vehicle_Test"
+trainLocation = "D:\TrainingMEngData\Vehicle_Train"
+testDataLoc = "D:\TrainingMEngData\Vehicle_Test\data.txt"
+trainDataLoc = "D:\TrainingMEngData\Vehicle_Train\data.txt"
 t = 0
-n=0
-x=1    
+n = 0
+x = 1
 
 
+def deNormalize(a, b, c, d, w, h):  # insert Denormalization here(I couldn't figure it out)
+    x1 = round(a * w)
+    y1 = round(b * h)
+    x2 = round(c * w)
+    y2 = round(d * h)
+    return x1, y1, x2, y2
 
-def deNormalize(a,b,c,d): # insert Denormalization here(I couldn't figure it out)
-    x1 = a
-    y1 = b
-    x2 = c
-    y2 = d
-    return x1,y1,x2,y2
 
+def Transfer(f, textLoc):  # this function deals with the txt side
 
-def Transfer(f,textLoc): # this function deals with the txt side
+    text, filePath, line, size = "", "", "", ""
 
-    text,filePath,line,size = "","","","" 
-    
-    d = open(f) # gets line from original txt
+    d = open(f)  # gets line from original txt
     text = d.readline()
     d.close()
-    
-    size = len(f) #gets file path
-    filePath = f[:size-3]
-    filePath = filePath+"JPG "
-    
-    
-    im= cv2.imread(filePath) # gets size of image
-    width=im.shape[1]
-    height=im.shape[0]
-    
-    
-    
-    if text=="": # This if statement should deal with empty images
-        x1=0
-        y1=0
-        x2=width
-        y2=height
+
+    size = len(f)  # gets file path
+    filePath = f[:size - 3]
+    filePath = filePath + "JPG "
+
+    im = cv2.imread(filePath)  # gets size of image
+    width = im.shape[1]
+    height = im.shape[0]
+
+    if text == "":  # This if statement should deal with empty images
+        x1 = 0
+        y1 = 0
+        x2 = width
+        y2 = height
         vClass = 8
-    else: 
+    else:
         vClass = text[0]
-        print(width,height)
+        print(width, height)
         coordOne = float(text[2:10])
         coordTwo = float(text[11:19])
         coordThr = float(text[20:28])
         coordFou = float(text[29:])
-        x1,y1,x2,y2 = deNormalize(coordOne,coordTwo,coordThr,coordFou)
-    
+        x1, y1, x2, y2 = deNormalize(coordOne, coordTwo, coordThr, coordFou, width, height)
 
-    #----- Writes to new txt------
+    # ----- Writes to new txt------
     line = filePath + str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "," + str(vClass) + "\n"
-    y = open(textLoc,"a")
+    y = open(textLoc, "a")
     y.write(line)
     y.close()
 
 
-#this function deals with copying img and calling the txt stuff at the right time
-def MoveItems(n,f,location): 
+# this function deals with copying img and calling the txt stuff at the right time
+def MoveItems(n, f, location):
     if n == 0:
-        shutil.copy(f,location)
-        n=1
-    elif n ==1:
+        shutil.copy(f, location)
+        n = 1
+    elif n == 1:
         textLoc = location + "\data.txt"
-        Transfer(f,textLoc)
-        n=0
+        Transfer(f, textLoc)
+        n = 0
     return n
 
-for filename in os.listdir(rootPath): # main function
-    x +=1
-    if x==20: # this limits to only first 10 or so sets(otherwise will take ages)
+
+for filename in os.listdir(rootPath):  # main function
+    x += 1
+    if x == 20:  # this limits to only first 10 or so sets(otherwise will take ages)
         break
     f = os.path.join(rootPath, filename)
     if t == 4:
-        n = MoveItems(n,f,testLocation)
-        t+=1
-    elif t==5:
-        n = MoveItems(n,f,testLocation)
-        t=0
+        n = MoveItems(n, f, testLocation)
+        t += 1
+    elif t == 5:
+        n = MoveItems(n, f, testLocation)
+        t = 0
     else:
-        n = MoveItems(n,f,trainLocation)
-        t+=1
+        n = MoveItems(n, f, trainLocation)
+        t += 1
