@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 from time import sleep
 from PIL import Image
+from datetime import datetime
+testmode = False
+start = datetime.now()
 
 width_min = 20  # Minimum rectangle length
 height_min = 20  # Minimum rectangle length
@@ -30,7 +33,8 @@ def work_centre(x, y, w, h):
 def screenshot(frame, x, y, w, h):
     im = Image.fromarray(frame, 'RGB')
     im1 = im.crop((x - w / 2, y - h / 2, x + w / 2, y + h / 2))
-    im1.show()
+    if testmode:
+        im1.show()
 
 
 def detection(detect, car_count):
@@ -53,7 +57,8 @@ backgroundObject = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
 while True:
     ret, frame = cap.read()
     tempo = float(1 / fps)
-    sleep(tempo)
+    if testmode:
+        sleep(tempo)
     if not ret:
         break
 
@@ -104,11 +109,11 @@ while True:
     foregroundPart = cv2.bitwise_and(frame, frame, mask=fgmask)
 
     stacked = np.hstack((frame, foregroundPart, frameCopy))
-
-    # cv2.imshow('Original Frame, Extracted Foreground and Detected Cars', cv2.resize(stacked, None, fx=0.5, fy=0.5))
-    cv2.imshow('Original Frame, Extracted Foreground and Detected Cars', stacked)
-
-    cv2.imshow('Clean Mask', fgmask)
+    if testmode:
+        #cv2.imshow('Original Frame, Extracted Foreground and Detected Cars', cv2.resize(stacked, None, fx=0.5, fy=0.5))
+        cv2.imshow('Original Frame, Extracted Foreground and Detected Cars', stacked)
+    
+        cv2.imshow('Clean Mask', fgmask)
 
     k = cv2.waitKey(1) & 0xff
 
