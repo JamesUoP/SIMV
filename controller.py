@@ -29,7 +29,7 @@ if __name__ == '__main__':
         # output is then retrieved from all threads
         output = detectors.output()
         # output is formatted and written to csv
-        CSV_writer.write_to_csv(output)
+        csv_writer.write_to_csv(output)
 
         print(output)  # prints output
 
