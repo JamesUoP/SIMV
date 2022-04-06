@@ -7,3 +7,4 @@ Housekeeping to complete
 - [ ] Comment all code
 - [ ] Sort test videos and images
 - [ ] Create test feature
+- [ ] Clear github of any obsolete files
