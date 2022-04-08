@@ -7,7 +7,7 @@ from detector import *
 
 videos = ['4ktestvid_Trim10sec.mp4', '4ktestvid_Trim10sec.mp4', '4ktestvid_Trim10sec.mp4', '4ktestvid_Trim10sec.mp4']
 line_positions = [[215, 215, 215, 215], [0, 0, 0, 0], [250, 250, 250, 250], [150, 150, 150, 150], [0, 0, 0, 0],
-                  [250, 250, 250, 250]]
+                  [250, 250, 250, 250]] #[[Out pos line ], [Out line left pos], [Out line Right pos],[In pos line ], [In line left pos], [In line Right pos]]
 P = len(videos)
 j = 0
 repeat = 2
