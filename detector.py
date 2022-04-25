@@ -1,9 +1,8 @@
 import time
+from time import sleep
 
 import cv2
 import numpy as np
-
-from time import sleep
 from PIL import Image
 
 test_mode = False
@@ -12,7 +11,7 @@ width_min = 40  # Minimum rectangle length
 height_min = 40  # Minimum rectangle length
 
 offset = 4  # Detection line offset
-reset_time = 10
+reset_time = 50
 # pos_line = 215  # Line position
 # line_left = 0
 # line_right = 250
@@ -39,6 +38,8 @@ class Detector:
         detect = []
         cars_in = 0
         cars_out = 0
+        hgv_in = 0
+        hgv_out = 0
         previous_frame = 0
         previous_x = 0
         backgroundObject = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
@@ -92,19 +93,23 @@ class Detector:
                         previous_x = x
 
                     if ((out_pos_line + offset) > y > (out_pos_line - offset)) and (out_line_left < x < out_line_right):
-                        previous_frame, previous_x, detect, cars_out = self.detection(cap, detect, cars_out,
-                                                                                      frame, x,
-                                                                                      y, w, h,
-                                                                                      previous_frame, previous_x, id,
-                                                                                      is_in=False)
+                        previous_frame, previous_x, detect, cars_out, hgv_out = self.detection(cap, detect, cars_out,
+                                                                                               hgv_out,
+                                                                                               frame, x,
+                                                                                               y, w, h,
+                                                                                               previous_frame,
+                                                                                               previous_x, id,
+                                                                                               is_in=False)
 
                     if ((in_pos_line + offset) > y > (in_pos_line - offset)) and (
                             in_line_left < x < in_line_right):
-                        previous_frame, previous_x, detect, cars_in = self.detection(cap, detect, cars_in,
-                                                                                     frame, x, y,
-                                                                                     w, h,
-                                                                                     previous_frame, previous_x, id,
-                                                                                     is_in=True)
+                        previous_frame, previous_x, detect, cars_in, hgv_in = self.detection(cap, detect, cars_in,
+                                                                                             hgv_in,
+                                                                                             frame, x, y,
+                                                                                             w, h,
+                                                                                             previous_frame, previous_x,
+                                                                                             id,
+                                                                                             is_in=True)
                         # print(str(detect)) Prints list of bounding boxes
 
                     if len(detect) == 10:  # when detect is of size 10 we clear for storage reasons
@@ -133,9 +138,9 @@ class Detector:
         if id == 0:
             print("cars in: " + str(cars_in) + " cars out: " + str(cars_out))
         # cv2.destroyAllWindows()
-        #self.results[id] = [cars_out, cars_in]
+        # self.results[id] = [cars_out, cars_in]
 
-    def detection(self, cap, detect, car_count, frame, x, y, w, h, previous_frame, previous_x, id, is_in):
+    def detection(self, cap, detect, car_count, hgv_count, frame, x, y, w, h, previous_frame, previous_x, id, is_in):
         prev_frame = cap.get(1)
         prev_x = x
         if cap.get(1) > previous_frame + 20 or (x > previous_x + 50 or x < previous_x - 50):
@@ -152,9 +157,14 @@ class Detector:
                          (0, 127, 255), 1)
                 if id == 0:
                     print(" OUT: " + str(car_count) + " " + str(cap.get(1)))
-            screenshot(frame, x, y, w, h)
+            #classification = screenshot(frame, x, y, w, h)
+           # print(classification)
+            #if classification == "truck":
+             #   hgv_count += 1
+           # else:
+              #  car_count += 1
         detect.remove((x, y))
-        return prev_frame, prev_x, detect, car_count
+        return prev_frame, prev_x, detect, car_count, hgv_count
 
     def output(self):
         return self.results
@@ -173,3 +183,6 @@ def screenshot(frame, x, y, w, h):
     im1 = im.crop((x - w / 2, y - h / 2, x + w / 2, y + h / 2))
     if test_mode_screenshot:
         im1.show('video{} Scrn'.format(id))
+    im1 = im1.save("tempimg.jpg")
+
+    #return label
