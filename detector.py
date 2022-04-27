@@ -5,8 +5,8 @@ import cv2
 import numpy as np
 from PIL import Image
 
-test_mode = False
-test_mode_screenshot = False
+test_mode = True
+test_mode_screenshot = True
 width_min = 40  # Minimum rectangle length
 height_min = 40  # Minimum rectangle length
 
@@ -22,28 +22,28 @@ fps = 100
 class Detector:
 
     def __init__(self, videos, line_position, results):
-        self.videos = videos # list of videos/feeds
-        self.results = results # results for vehicles going in and out of video feeds
-        self.out_pos_line, self.in_pos_line = line_position[0], line_position[3] # position of line on video/feed
-        self.out_line_left, self.in_line_left = line_position[1], line_position[4] # left point of line for both out and in videos
-        self.out_line_right, self.in_line_right = line_position[2], line_position[5] # right point of line for both out and in videos
+        self.videos = videos
+        self.results = results
+        self.out_pos_line, self.in_pos_line = line_position[0], line_position[3]
+        self.out_line_left, self.in_line_left = line_position[1], line_position[4]
+        self.out_line_right, self.in_line_right = line_position[2], line_position[5]
 
     def vehicle_detection(self, id):
-        cap = cv2.VideoCapture(self.videos[id]) # screen captures from the video that is selected from id
-        out_pos_line, in_pos_line = self.out_pos_line[id], self.in_pos_line[id] # position of line in video from id
-        out_line_left, in_line_left = self.out_line_left[id], self.in_line_left[id] # left point of line for both out and in from video chosen from id
-        out_line_right, in_line_right = self.out_line_right[id], self.in_line_right[id] # right point of line for both out and in from video chosen from id
+        cap = cv2.VideoCapture(self.videos[id])
+        out_pos_line, in_pos_line = self.out_pos_line[id], self.in_pos_line[id]
+        out_line_left, in_line_left = self.out_line_left[id], self.in_line_left[id]
+        out_line_right, in_line_right = self.out_line_right[id], self.in_line_right[id]
         kernel = None
-        running = True # dection is running
-        detect = [] # for vehicles that are dectected
-        cars_in = 0 # cars going into the video feed
-        cars_out = 0 # cars going out the video feed
-        hgv_in = 0 # hgv going into the video feed
-        hgv_out = 0 # hgv going out the video feed
+        running = True
+        detect = []
+        cars_in = 0
+        cars_out = 0
+        hgv_in = 0
+        hgv_out = 0
         previous_frame = 0
-        previous_x = 0 
-        backgroundObject = cv2.createBackgroundSubtractorMOG2(detectShadows=True) # motion dectection 
-        current_time = time.time() # get current time
+        previous_x = 0
+        backgroundObject = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
+        current_time = time.time()
 
         while running:
             ret, frame = cap.read()
@@ -157,7 +157,7 @@ class Detector:
                          (0, 127, 255), 1)
                 if id == 0:
                     print(" OUT: " + str(car_count) + " " + str(cap.get(1)))
-            #classification = screenshot(frame, x, y, w, h)
+            screenshot(frame, x, y, w, h)
            # print(classification)
             #if classification == "truck":
              #   hgv_count += 1
@@ -179,7 +179,10 @@ def work_centre(x, y, w, h):
 
 
 def screenshot(frame, x, y, w, h):
+    percent = 0.05
     im = Image.fromarray(frame, 'RGB')
+    h += h * percent
+    w += w * percent
     im1 = im.crop((x - w / 2, y - h / 2, x + w / 2, y + h / 2))
     if test_mode_screenshot:
         im1.show('video{} Scrn'.format(id))
