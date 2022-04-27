@@ -11,8 +11,8 @@ line_positions = [[215, 215, 215, 215], [0, 0, 0, 0], [250, 250, 250, 250], [150
 P = len(videos)
 j = 0
 repeat = 4
-results = [[None] * 2] * P
-threads = numpy.empty(P, dtype=object)
+results = [[None] * 2] * P # results in list dependant on number of input videos/feeds
+threads = numpy.empty(P, dtype=object) # number of threads
 
 if __name__ == '__main__':
 
@@ -33,4 +33,4 @@ if __name__ == '__main__':
 
         print(output)  # prints output
 
-        cv2.destroyAllWindows()
+        cv2.destroyAllWindows() # closes windows
