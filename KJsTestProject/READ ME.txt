@@ -1,7 +1,7 @@
 # Required Packages #
-- Numpy
 - CVZone (includes cv2)
-- Tensorflow (includes other packages)
+- Pandas
+- Tensorflow
 
 # Installation with Pycharm #
 - File
