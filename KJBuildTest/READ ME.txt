@@ -1,5 +1,5 @@
 # Required Packages #
-- Numpy
+- Pandas
 - CVZone (includes cv2)
 - Tensorflow (includes other packages)
 
