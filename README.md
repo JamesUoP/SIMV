@@ -2,7 +2,6 @@
 Minimum Versions:
 - Python      3.10
 - OpenCV      4.5.5.64
-- tensorflow  2.7.0
 - numpy       1.19.3
 
 Housekeeping to complete
