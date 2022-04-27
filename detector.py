@@ -38,8 +38,6 @@ class Detector:
         detect = []
         cars_in = 0
         cars_out = 0
-        hgv_in = 0
-        hgv_out = 0
         previous_frame = 0
         previous_x = 0
         backgroundObject = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
@@ -69,47 +67,45 @@ class Detector:
 
                 if cv2.contourArea(cnt) > 400:
                     x, y, width, height = cv2.boundingRect(cnt)
-
-                    cv2.rectangle(frameCopy, (x, y), (x + width, y + height), (0, 0, 255), 2)
+                    if test_mode_bounding_boxes:
+                        cv2.rectangle(frameCopy, (x, y), (x + width, y + height), (0, 0, 255), lineWidth)
 
                     cv2.putText(frameCopy, 'Car Detected', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 0), 1,
                                 cv2.LINE_AA)
-
-            cv2.line(frame, (out_line_left, out_pos_line), (out_line_right, out_pos_line), (255, 127, 0), 1)
-            cv2.line(frame, (in_line_left, in_pos_line), (in_line_right, in_pos_line), (255, 127, 0), 1)
+                if test_mode_bounding_boxes:
+                    cv2.line(frame, (out_line_left, out_pos_line), (out_line_right, out_pos_line), (255, 127, 0), lineWidth)
+                    cv2.line(frame, (in_line_left, in_pos_line), (in_line_right, in_pos_line), (255, 127, 0), lineWidth)
+                    
             for (i, c) in enumerate(contours):
                 (x, y, w, h) = cv2.boundingRect(c)
                 validate_outline = (w >= width_min) and (h >= height_min)
                 if not validate_outline:
                     continue
-
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                if test_mode_bounding_boxes:
+                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), lineWidth)
                 center = work_centre(x, y, w, h)
                 detect.append(center)
-                cv2.circle(frame, center, 4, (0, 0, 255), -1)
+                if test_mode_bounding_boxes:
+                    cv2.circle(frame, center, 4, (0, 0, 255), -lineWidth)
 
                 for (x, y) in detect:
                     if cars_in and cars_out == 0:
                         previous_x = x
 
                     if ((out_pos_line + offset) > y > (out_pos_line - offset)) and (out_line_left < x < out_line_right):
-                        previous_frame, previous_x, detect, cars_out, hgv_out = self.detection(cap, detect, cars_out,
-                                                                                               hgv_out,
-                                                                                               frame, x,
-                                                                                               y, w, h,
-                                                                                               previous_frame,
-                                                                                               previous_x, id,
-                                                                                               is_in=False)
+                        previous_frame, previous_x, detect, cars_out = self.detection(cap, detect, cars_out,
+                                                                                      frame, x,
+                                                                                      y, w, h,
+                                                                                      previous_frame, previous_x, id,
+                                                                                      is_in=False)
 
                     if ((in_pos_line + offset) > y > (in_pos_line - offset)) and (
                             in_line_left < x < in_line_right):
-                        previous_frame, previous_x, detect, cars_in, hgv_in = self.detection(cap, detect, cars_in,
-                                                                                             hgv_in,
-                                                                                             frame, x, y,
-                                                                                             w, h,
-                                                                                             previous_frame, previous_x,
-                                                                                             id,
-                                                                                             is_in=True)
+                        previous_frame, previous_x, detect, cars_in = self.detection(cap, detect, cars_in,
+                                                                                     frame, x, y,
+                                                                                     w, h,
+                                                                                     previous_frame, previous_x, id,
+                                                                                     is_in=True)
                         # print(str(detect)) Prints list of bounding boxes
 
                     if len(detect) == 10:  # when detect is of size 10 we clear for storage reasons
@@ -138,33 +134,30 @@ class Detector:
         if id == 0:
             print("cars in: " + str(cars_in) + " cars out: " + str(cars_out))
         # cv2.destroyAllWindows()
-        # self.results[id] = [cars_out, cars_in]
+        #self.results[id] = [cars_out, cars_in]
 
-    def detection(self, cap, detect, car_count, hgv_count, frame, x, y, w, h, previous_frame, previous_x, id, is_in):
+    def detection(self, cap, detect, car_count, frame, x, y, w, h, previous_frame, previous_x, id, is_in):
         prev_frame = cap.get(1)
         prev_x = x
         if cap.get(1) > previous_frame + 20 or (x > previous_x + 50 or x < previous_x - 50):
             car_count += 1
             if is_in:
-                cv2.line(frame, (self.in_line_left[id], self.in_pos_line[id]),
+                if test_mode_bounding_boxes:
+                    cv2.line(frame, (self.in_line_left[id], self.in_pos_line[id]),
                          (self.in_line_right[id], self.in_pos_line[id]),
                          (0, 127, 255), 1)
                 if id == 0:
                     print(" IN: " + str(car_count) + " " + str(cap.get(1)))
             else:
-                cv2.line(frame, (self.out_line_left[id], self.out_pos_line[id]),
+                if test_mode_bounding_boxes:
+                    cv2.line(frame, (self.out_line_left[id], self.out_pos_line[id]),
                          (self.out_line_right[id], self.out_pos_line[id]),
                          (0, 127, 255), 1)
                 if id == 0:
                     print(" OUT: " + str(car_count) + " " + str(cap.get(1)))
             screenshot(frame, x, y, w, h)
-           # print(classification)
-            #if classification == "truck":
-             #   hgv_count += 1
-           # else:
-              #  car_count += 1
         detect.remove((x, y))
-        return prev_frame, prev_x, detect, car_count, hgv_count
+        return prev_frame, prev_x, detect, car_count
 
     def output(self):
         return self.results
@@ -187,5 +180,3 @@ def screenshot(frame, x, y, w, h):
     if test_mode_screenshot:
         im1.show('video{} Scrn'.format(id))
     im1 = im1.save("tempimg.jpg")
-
-    #return label
