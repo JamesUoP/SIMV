@@ -6,7 +6,7 @@
 # Installation with Pycharm
 1) File
 2) Settings
-3) Project:...
+3) Project: ...
 4) Python Interpreter
 5) click the +
 6) Enter name for each package & click install (may take a while)
