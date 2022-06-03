@@ -1,0 +1,4 @@
+0 Car
+1 Van
+2 Bus
+3 Lorry
