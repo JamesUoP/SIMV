@@ -1,9 +1,9 @@
-**Required Packages**
+#**Required Packages**
 - CVZone (includes cv2)   [1.5.6]
 - Tensorflow              [2.8.0]
 - Pandas                  [1.4.2]
 
-**Installation with Pycharm**
+#**Installation with Pycharm**
 1) File
 2) Settings
 3) Project:...
